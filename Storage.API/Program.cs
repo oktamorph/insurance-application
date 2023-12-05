@@ -1,4 +1,3 @@
-//using Insurance.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Storage.API.DBContext;
 using Storage.API.Services;
@@ -16,7 +15,6 @@ builder.Services.AddDbContext<StorageContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("InsuranceDBConnection"));
 });
 
-//builder.Services.AddScoped<IInsuranceService, InsuranceService>();
 builder.Services.AddScoped<IStorageService, StorageService>();
 
 var app = builder.Build();
