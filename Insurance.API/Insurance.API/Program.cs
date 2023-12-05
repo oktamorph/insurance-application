@@ -2,6 +2,9 @@
 //TODO: implement data access layer functionality
 
 using Insurance.API.Services;
+using Microsoft.EntityFrameworkCore;
+using Storage.API.DBContext;
+using Storage.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +15,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<StorageContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("InsuranceDBConnection"));
+});
+
+builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IInsuranceService, InsuranceService>();
 
 var app = builder.Build();

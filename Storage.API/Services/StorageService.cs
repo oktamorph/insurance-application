@@ -18,7 +18,7 @@ namespace Storage.API.Services
         }
         public async Task<StorageItem> GetById(Guid id)
         {
-            return await _storageContext.Storages.FirstOrDefaultAsync(x => x.Id == id);
+            return await _storageContext.Storages.FirstOrDefaultAsync(x => x.InsuranceGuid == id);
         }
         public async Task<StorageItem> Add(StorageItem item)
         {
@@ -29,12 +29,12 @@ namespace Storage.API.Services
         }
         public async Task<StorageItem> Update(StorageItem item)
         {
-            var result = await _storageContext.Storages.FirstOrDefaultAsync(x => x.Id == item.Id);
+            var result = await _storageContext.Storages.FirstOrDefaultAsync(x => x.InsuranceGuid == item.InsuranceGuid);
 
             if (result != null)
             {
-                result.InsuranceItem.FirstName = item.InsuranceItem.FirstName;
-                result.InsuranceItem.LastName = item.InsuranceItem.LastName;
+                result.FirstName = item.FirstName;
+                result.LastName = item.LastName;
 
                 await _storageContext.SaveChangesAsync();
                 return result;
@@ -44,7 +44,7 @@ namespace Storage.API.Services
         }
         public async void Delete(Guid id)
         {
-            var result = await _storageContext.Storages.FirstOrDefaultAsync(x => x.Id == id);
+            var result = await _storageContext.Storages.FirstOrDefaultAsync(x => x.InsuranceGuid == id);
             if (result != null)
             {
                 _storageContext.Storages.Remove(result);

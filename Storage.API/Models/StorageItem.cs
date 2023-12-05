@@ -1,10 +1,11 @@
-﻿using Insurance.API.Models;
-
-namespace Storage.API.Models
+﻿namespace Storage.API.Models
 {
     public class StorageItem
     {
-        public Guid Id { get; set; }
-        public required InsuranceItem InsuranceItem { get; set; }
+        public int Id { get; set; }
+        public Guid InsuranceGuid { get; set; }
+        public required string CustomerNumber { get; set; } //Personnnummer
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
     }
 }
