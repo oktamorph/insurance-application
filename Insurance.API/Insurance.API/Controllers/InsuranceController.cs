@@ -56,8 +56,13 @@ namespace Insurance.API.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var insurance = _service.Add(item);
-                return CreatedAtAction("Get", new { id = insurance.Id }, insurance);
+                if (ValidateCustomerNumber(item.CustomerNumber))
+                {
+                    var insurance = _service.Add(item);
+                    return CreatedAtAction("Get", new { id = insurance.Id }, insurance);
+                }
+                else
+                    return BadRequest($"Check that the provided customer number = '{item.CustomerNumber}' is correc.");
             }
             catch (Exception ex)
             {
@@ -105,6 +110,16 @@ namespace Insurance.API.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
+        }
+        private static bool ValidateCustomerNumber(string customerNumber)
+        {
+            if (customerNumber == null)
+                return false;
+
+            if (customerNumber.Length == 10 || customerNumber.Length == 12)
+                return true;
+
+            return false;
         }
     }
 }
