@@ -1,8 +1,6 @@
 ﻿using Insurance.API.Services;
 using Insurance.API.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Contracts;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Storage.API.Services;
 using Storage.API.Models;
 
@@ -11,146 +9,34 @@ namespace Insurance.API.Controllers
     [Route("api/v1/[controller]")]
     public class InsuranceController : ControllerBase
     {
+        #region Variables
         private readonly IInsuranceService _insuranceService;
         private readonly IStorageService _storageService;
-        public InsuranceController(IInsuranceService service, IStorageService storageService)
+        #endregion
+        /// <summary>
+        /// The constructor.
+        /// </summary>
+        /// <param name="insuranceService">IInsuranceService instance.</param>
+        /// <param name="storageService">IStorageService instance.</param>
+        public InsuranceController(IInsuranceService insuranceService, IStorageService storageService)
         {
-            _insuranceService = service;
+            _insuranceService = insuranceService;
             _storageService = storageService;
         }
-        //[HttpGet]
-        //public IActionResult Get()
-        //{
-        //    try
-        //    {
-        //        var insurances = _insuranceService.GetInsuranceItems();
-
-        //        if (insurances == null)
-        //            return NotFound("Insurances not found.");
-
-        //        return Ok(insurances);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-        //    }
-        //}
-        //[HttpGet("{id}")]
-        //public IActionResult Get(Guid id)
-        //{
-        //    try
-        //    {
-        //        var insurance = _insuranceService.GetById(id);
-
-        //        if (insurance == null)
-        //            return NotFound($"Insurance with Id = '{id} not found.");
-
-        //        return Ok(insurance);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-        //    }
-        //}
-        //[HttpPost]
-        //public IActionResult Post([FromBody] InsuranceItem item)
-        //{
-        //    try
-        //    {
-        //        if (!ModelState.IsValid)
-        //            return BadRequest(ModelState);
-
-        //        if (ValidateCustomerNumber(item.CustomerNumber))
-        //        {
-        //            var insurance = _insuranceService.Add(item);
-        //            return CreatedAtAction("Get", new { id = insurance.Id }, insurance);
-        //        }
-        //        else
-        //            return BadRequest($"Check that the provided customer number = '{item.CustomerNumber}' is correc.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-        //    }
-        //}
-        //[HttpPut]
-        //public IActionResult Put([FromBody] InsuranceItem item, Guid id)
-        //{
-        //    try
-        //    {
-        //        if (!ModelState.IsValid)
-        //            return BadRequest(ModelState);
-
-        //        var insuranceUpdate = _insuranceService.GetById(id);
-
-        //        if (insuranceUpdate == null)
-        //            return NotFound($"Insurance with Id = '{id} not found.");
-
-        //        insuranceUpdate.FirstName = item.FirstName;
-        //        insuranceUpdate.LastName = item.LastName;
-
-        //        _insuranceService.Update(insuranceUpdate);
-        //        return Content($"Insurance with Id = '{id}' is updated.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-        //    }
-        //}
-        //[HttpDelete("{id}")]
-        //public IActionResult Delete(Guid id)
-        //{
-        //    try
-        //    {
-        //        var insurace = _insuranceService.GetById(id);
-
-        //        if (insurace == null)
-        //            return NotFound($"Insurance with Id = '{id}' not found.");
-
-        //        _insuranceService.Delete(id);
-        //        return NoContent();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-        //    }
-        //}
-        //private static bool ValidateCustomerNumber(string customerNumber)
-        //{
-        //    if (customerNumber == null)
-        //        return false;
-
-        //    if (customerNumber.Length == 10 || customerNumber.Length == 12)
-        //        return true;
-
-        //    return false;
-        //}
+        /// <summary>
+        /// The method that returns the storage item by guidId from the database.
+        /// </summary>
+        /// <param name="insuranceGuid">GuidID parameter.</param>
+        /// <param name="customerNumber">Customer number parameter.</param>
         [HttpGet]
-        public IActionResult Get()
+        public async Task<ActionResult<InsuranceItem>> Get(Guid insuranceGuid, string customerNumber)
         {
             try
             {
-                var insurances = _storageService.GetStorageItems();
-
-                if (insurances.Result.Count() == 0)
-                    return NotFound("Insurances not found.");
-
-                return Ok(insurances);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-        [HttpGet("{id}")]
-        public IActionResult Get(Guid id)
-        {
-            try
-            {
-                var insurance = _insuranceService.GetById(id);
+                var insurance = await _storageService.GetByIdAndCustomerNumber(insuranceGuid, customerNumber);
 
                 if (insurance == null)
-                    return NotFound($"Insurance with Id = '{id} not found.");
+                    return NotFound($"Insurance with Id = '{insuranceGuid}' and Customer number = '{customerNumber}' not found.");
 
                 return Ok(insurance);
             }
@@ -159,8 +45,13 @@ namespace Insurance.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        /// <summary>
+        /// The method that adds new storage item in the database.
+        /// </summary>
+        /// <param name="item">InsuranceItem instance.</param>
+        /// <returns></returns>
         [HttpPost]
-        public IActionResult Post([FromBody] StorageItem item)
+        public async Task<ActionResult<InsuranceItem>> Post([FromBody] InsuranceItem item)
         {
             try
             {
@@ -169,7 +60,15 @@ namespace Insurance.API.Controllers
 
                 if (ValidateCustomerNumber(item.CustomerNumber))
                 {
-                    var insurance = _storageService.Add(item);
+                    var storageItem = new StorageItem()
+                    {
+                        InsuranceGuid = item.InsuranceGuid,
+                        CustomerNumber = item.CustomerNumber,
+                        FirstName = item.FirstName,
+                        LastName = item.LastName
+                    };
+
+                    var insurance = await _storageService.Add(storageItem);
                     return CreatedAtAction("Get", new { id = insurance.Id }, insurance);
                 }
                 else
@@ -180,48 +79,66 @@ namespace Insurance.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        /// <summary>
+        /// The method that updates the storage item in the database.
+        /// </summary>
+        /// <param name="item">InsuranceItem instance.</param>
+        /// <param name="insuranceGuid">GuidID parameter.</param>
+        /// <param name="customerNumber">Customer number parameter.</param>
+        /// <returns></returns>
         [HttpPut]
-        public IActionResult Put([FromBody] InsuranceItem item, Guid id)
+        public async Task<ActionResult<InsuranceItem>> Put([FromBody] InsuranceItem item, Guid insuranceGuid, string customerNumber)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var insuranceUpdate = _insuranceService.GetById(id);
+                var insuranceUpdate = await _storageService.GetByIdAndCustomerNumber(insuranceGuid, customerNumber);
 
                 if (insuranceUpdate == null)
-                    return NotFound($"Insurance with Id = '{id} not found.");
+                    return NotFound($"Insurance with Id = '{insuranceGuid}' and Customer number = '{customerNumber}' not found.");
 
                 insuranceUpdate.FirstName = item.FirstName;
                 insuranceUpdate.LastName = item.LastName;
 
-                _insuranceService.Update(insuranceUpdate);
-                return Content($"Insurance with Id = '{id}' is updated.");
+                await _storageService.Update(insuranceUpdate);
+                return Content($"Insurance with Id = '{insuranceGuid}' and Customer number = '{customerNumber}' is updated.");
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
-        [HttpDelete("{id}")]
-        public IActionResult Delete(Guid id)
+        /// <summary>
+        /// The method that deletes the storage item from the database.
+        /// </summary>
+        /// <param name="insuranceGuid">GuidID parameter.</param>
+        /// <param name="customerNumber">Customer number parameter.</param>
+        /// <returns></returns>
+        [HttpDelete]
+        public async Task<ActionResult<InsuranceItem>> Delete(Guid insuranceGuid, string customerNumber)
         {
             try
             {
-                var insurace = _insuranceService.GetById(id);
+                var insurance = await _storageService.GetByIdAndCustomerNumber(insuranceGuid, customerNumber);
 
-                if (insurace == null)
-                    return NotFound($"Insurance with Id = '{id}' not found.");
+                if (insurance == null)
+                    return NotFound($"Insurance with Id = '{insuranceGuid}' and Customer number = '{customerNumber}' not found.");
 
-                _insuranceService.Delete(id);
-                return NoContent();
+                _storageService.Delete(insuranceGuid, customerNumber);
+                return Content($"Insurance with Id = '{insuranceGuid}' and Customer number = '{customerNumber}' was deleted.");
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+        /// <summary>
+        /// The method that validates the customer number.
+        /// </summary>
+        /// <param name="customerNumber">Customer number parameter.</param>
+        /// <returns></returns>
         private static bool ValidateCustomerNumber(string customerNumber)
         {
             if (customerNumber == null)

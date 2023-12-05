@@ -18,21 +18,14 @@ namespace Storage.API.Services
             this._storageContext = storageContext;
         }
         /// <summary>
-        /// The method that returns all storage items from the database.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IEnumerable<StorageItem>> GetStorageItems()
-        {
-            return await _storageContext.StorageItems.ToListAsync();
-        }
-        /// <summary>
         /// The method that returns the storage item by guidId from the database.
         /// </summary>
         /// <param name="guidId">GuidID parameter.</param>
+        /// <param name="customerNumber">Customer number parameter.</param>
         /// <returns></returns>
-        public async Task<StorageItem> GetById(Guid guidId)
+        public async Task<StorageItem> GetByIdAndCustomerNumber(Guid guidId, string customerNumber)
         {
-            return await _storageContext.StorageItems.FirstOrDefaultAsync(x => x.InsuranceGuid == guidId);
+            return await _storageContext.StorageItems.FirstOrDefaultAsync(x => x.InsuranceGuid == guidId && x.CustomerNumber == customerNumber);
         }
         /// <summary>
         /// The method that adds new storage item in the database.
@@ -53,7 +46,7 @@ namespace Storage.API.Services
         /// <returns></returns>
         public async Task<StorageItem> Update(StorageItem item)
         {
-            var result = await _storageContext.StorageItems.FirstOrDefaultAsync(x => x.InsuranceGuid == item.InsuranceGuid);
+            var result = await _storageContext.StorageItems.FirstOrDefaultAsync(x => x.InsuranceGuid == item.InsuranceGuid && x.CustomerNumber == item.CustomerNumber);
 
             if (result != null)
             {
@@ -69,9 +62,10 @@ namespace Storage.API.Services
         /// The method that deletes the storage item from the database.
         /// </summary>
         /// <param name="guidId">GuidID parameter.</param>
-        public async void Delete(Guid guidId)
+        /// <param name="customerNumber">Customer number parameter.</param>
+        public async void Delete(Guid guidId, string customerNumber)
         {
-            _storageContext.StorageItems.Where(x => x.InsuranceGuid == guidId).ExecuteDelete();
+            _storageContext.StorageItems.Where(x => x.InsuranceGuid == guidId && x.CustomerNumber == customerNumber).ExecuteDelete();
             await _storageContext.SaveChangesAsync();
         }
     }

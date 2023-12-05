@@ -1,6 +1,3 @@
-//TODO: add data access logic
-//TODO: implement data access layer functionality
-
 using Insurance.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Storage.API.DBContext;

@@ -4,10 +4,9 @@ namespace Insurance.API.Services
 {
     public interface IInsuranceService
     {
-        IEnumerable<InsuranceItem> GetInsuranceItems();
-        InsuranceItem GetById(Guid id);
-        InsuranceItem Add(InsuranceItem item);        
-        InsuranceItem Update(InsuranceItem item);
-        InsuranceItem Delete(Guid id);
+        Task<InsuranceItem> GetByIdAndCustomerNumber(Guid guidId, string customerNumber);
+        Task<InsuranceItem> Add(InsuranceItem item);        
+        Task<InsuranceItem> Update(InsuranceItem item);
+        void Delete(Guid guidId, string customerNumber);
     }
 }
