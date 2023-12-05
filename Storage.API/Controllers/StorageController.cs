@@ -13,11 +13,11 @@ namespace Storage.API.Controllers
             _storageService = storageService;
         }
         [HttpGet]
-        public IActionResult Get()
+        public async Task<ActionResult<StorageItem>> Get()
         {
             try
             {
-                var insurances = _storageService.GetStorageItems();
+                var insurances = await _storageService.GetStorageItems();
 
                 if (insurances == null)
                     return NotFound("Insurances not found.");
@@ -30,11 +30,11 @@ namespace Storage.API.Controllers
             }
         }
         [HttpGet("{guidId}")]
-        public IActionResult Get(Guid guidId)
+        public async Task<ActionResult<StorageItem>> Get(Guid guidId)
         {
             try
             {
-                var insurance = _storageService.GetById(guidId);
+                var insurance = await _storageService.GetById(guidId);
 
                 if (insurance == null)
                     return NotFound($"Insurance with Id = '{guidId} not found.");
@@ -47,14 +47,14 @@ namespace Storage.API.Controllers
             }
         }
         [HttpPost]
-        public IActionResult Post([FromBody] StorageItem item)
+        public async Task<ActionResult<StorageItem>> Post([FromBody] StorageItem item)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var insurance = _storageService.Add(item);
+                var insurance = await _storageService.Add(item);
                 return CreatedAtAction("Get", new { id = insurance.Id }, insurance);
             }
             catch (Exception ex)
@@ -63,46 +63,46 @@ namespace Storage.API.Controllers
             }
         }
         [HttpPut]
-        public IActionResult Put([FromBody] StorageItem item, Guid id)
+        public async Task<ActionResult<StorageItem>> Put([FromBody] StorageItem item, Guid guidId)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                var insuranceUpdate = _storageService.GetById(id);
+                var insuranceUpdate = await _storageService.GetById(guidId);
 
                 if (insuranceUpdate == null)
-                    return NotFound($"Insurance with Id = '{id} not found.");
+                    return NotFound($"Insurance with Id = '{guidId} not found.");
 
-                insuranceUpdate.Result.FirstName = item.FirstName;
-                insuranceUpdate.Result.LastName = item.LastName;
+                insuranceUpdate.FirstName = item.FirstName;
+                insuranceUpdate.LastName = item.LastName;
 
-                _storageService.Update(insuranceUpdate.Result);
-                return Content($"Insurance with Id = '{id}' is updated.");
+                await _storageService.Update(insuranceUpdate);
+                return Content($"Insurance with Id = '{guidId}' is updated.");
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
-        //[HttpDelete("{id}")]
-        //public IActionResult Delete(Guid id)
-        //{
-        //    try
-        //    {
-        //        var insurace = _insuranceService.GetById(id);
+        [HttpDelete("{guidId}")]
+        public async Task<ActionResult<StorageItem>> Delete(Guid guidId)
+        {
+            try
+            {
+                var insurance = await _storageService.GetById(guidId);
 
-        //        if (insurace == null)
-        //            return NotFound($"Insurance with Id = '{id}' not found.");
+                if (insurance == null)
+                    return NotFound($"Insurance with Id = '{guidId}' not found.");
 
-        //        _insuranceService.Delete(id);
-        //        return NoContent();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-        //    }
-        //}
+                _storageService.Delete(guidId);
+                return Content($"Insurance with Id = '{guidId}' was deleted.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
     }
 }

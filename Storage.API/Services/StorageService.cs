@@ -14,9 +14,9 @@ namespace Storage.API.Services
         {
             this._storageContext = storageContext;
         }
-        public IEnumerable<StorageItem> GetStorageItems()
+        public async Task<IEnumerable<StorageItem>> GetStorageItems()
         {
-            return _storageContext.StorageItems.ToList();
+            return await _storageContext.StorageItems.ToListAsync();
         }
         public async Task<StorageItem> GetById(Guid id)
         {
@@ -46,12 +46,8 @@ namespace Storage.API.Services
         }
         public async void Delete(Guid id)
         {
-            var result = await _storageContext.StorageItems.FirstOrDefaultAsync(x => x.InsuranceGuid == id);
-            if (result != null)
-            {
-                _storageContext.StorageItems.Remove(result);
-                await _storageContext.SaveChangesAsync();
-            }
+            _storageContext.StorageItems.Where(x => x.InsuranceGuid == id).ExecuteDelete();
+            await _storageContext.SaveChangesAsync();
         }
     }
 }
