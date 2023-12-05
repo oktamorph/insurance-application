@@ -1,4 +1,6 @@
 using Insurance.API.Services;
+using Microsoft.EntityFrameworkCore;
+using Storage.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +10,13 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<LoanDepartmentContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("InsuranceDBConnection"));
+});
 
 builder.Services.AddScoped<IInsuranceService, InsuranceService>();
+builder.Services.AddScoped<IStorageService, StorageService>();
 
 var app = builder.Build();
 
