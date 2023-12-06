@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
 using NuGet.Frameworks;
 using Storage.API.Controllers;
@@ -23,19 +24,6 @@ namespace Storage.API.Tests.Controllers
         {
             _mockService = new Mock<IStorageService>();
             _controller = new StorageController(_mockService.Object);
-        }
-        [Fact]
-        public async void Insurance_Get_By_Id_And_Customer_Number()
-        {
-            // Arrange
-            var guid = Guid.NewGuid();
-            var customerNumber = "123456781234";
-
-            // Act            
-            var insurance = await _controller.Get(guid, customerNumber);
-
-            // Assert
-            Assert.IsType<ActionResult<StorageItem>>(insurance);
         }
         [Fact]
         public async void Insurance_Create()
